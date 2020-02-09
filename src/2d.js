@@ -1,6 +1,6 @@
 import buildRegl from 'regl'
 import mouseChange from 'mouse-change'
-import fragmentShaderCode from 'shaders/2d.vert'
+import fragmentShaderCode from 'shaders/fbm.frag'
 
 const regl = buildRegl()
 
