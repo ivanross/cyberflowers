@@ -137,7 +137,7 @@ const drawSphere = regl({
 
       vec3 color = mix(color1, color2, vPositionPolar.r / 2.0);
       gl_FragColor = vec4(color.rgb, 1.0);
-      // gl_FragColor = vec4(vPosition.xyz, 1.0); // <---- CUT HERE >8
+      gl_FragColor = vec4(vPosition.xyz, 1.0); // <---- CUT HERE >8
     }
   `,
   attributes: {

@@ -1,15 +1,13 @@
 import buildRegl from 'regl'
 import mouseChange from 'mouse-change'
-import fragmentShaderCode from './shaders/2d.fragment.glsl'
+import fragmentShaderCode from 'shaders/2d.vert'
 
 const regl = buildRegl()
-
-const glsl = x => x
 
 const draw = regl({
   frag: fragmentShaderCode,
 
-  vert: glsl`
+  vert: `
     precision mediump float;
     attribute vec2 position;
     void main () {
