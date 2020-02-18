@@ -7,10 +7,14 @@ uniform float u_time;
 uniform float u_randomness;
 uniform float u_distance;
 uniform float u_radius;
+uniform sampler2D u_texture_0;
+
 uniform float u_radius_offset;
 uniform vec2 u_mouse;
 uniform float u_speed;
 uniform vec2 u_resolution;
+
+uniform vec2 u_trails[10];
 
 vec3 black=vec3(0.,0.,0.);
 vec3 white=vec3(1.,1.,1.);
@@ -58,7 +62,8 @@ float map(float value,float min1,float max1,float min2,float max2){
   return min2+(value-min1)*(max2-min2)/(max1-min1);
 }
 
-float ease(float t){return-t*(t-2.);}
+float ease(float t){return t*t;}
+// float ease(float t){return-t*(t-2.);}
 
 vec4 alphaContrast(vec4 color,float mult,float sub){
   float a=limit(color.a*mult-sub);
@@ -107,50 +112,47 @@ float _shape(vec2 p,float rad,float amp,float randomness){
 
 float shape(vec2 p,float rad,float amp,float randomness){
   return _shape(p,rad,amp,randomness)-
-  _shape(p,rad-.003,amp,randomness);
+  _shape(p,rad-.002,amp,randomness);
+}
+
+vec4 logo(vec2 p){
+  vec2 logo_res=vec2(1220,810);
+  float scale=.2;
+  
+  p/=logo_res;
+  p*=min(logo_res.x,logo_res.y);
+  p/=scale;
+  p+=.5;
+  
+  if(p.x>0.&&p.x<1.&&p.y>0.&&p.y<1.){
+    return texture2D(u_texture_0,p)*.8;
+  }else{
+    return vec4(0.);
+  }
 }
 
 void main(){
   vec2 p=gl_FragCoord.xy/min(u_resolution.x,u_resolution.y)
   -.5*u_resolution/min(u_resolution.x,u_resolution.y);
-  p*=rotate(PI-PI/4.);
-  #define N 12.
-  vec4 color=vec4(black,0.);
   
-  for(float i=N;i>=0.;i--){
+  #define N 20.
+  vec4 color=vec4(0.);
+  for(float i=0.;i<N;i++){
     float offset=.5*u_radius_offset;
     
     float radius=map(i,0.,N,0.,offset)+u_radius*.4;
     float dist=.4*u_distance;//map(ease(i / N), 0., 1., .1, .1);
     float randomness=map(i,0.,N,1.2,4.)*u_randomness;
-    float opacity=map(ease(i/N),0.,1.,1.,.2);
+    float opacity=map(ease(i/N),1.,0.,1.,.02);
     
-    vec4 body=vec4(black,_shape(p,radius,dist,randomness));
-    vec4 outfit=vec4(white*opacity,shape(p,radius,dist,randomness));
+    vec4 body=vec4(vec3((i/N)*.5),1.-_shape(p,radius,dist,randomness));
+    vec4 outline=vec4(white*opacity,shape(p,radius,dist,randomness));
     color=blend(color,body);
-    color=blend(color,outfit);
+    color=blend(color,outline);
   }
   
-  // for(float i=1.;i<N;i++){
-    //   float radius=map(ease(i/N),0.,1.,.35,.45);
-    //   float dist=map(ease(i/N),0.,1.,.02,.17);
-    //   float randomness=5.*u_randomness;
-    //   float opacity=map(ease(i/N),0.,1.,1.,.1);
-    
-    //   vec4 layer=vec4(orange,shape(p,radius,dist,randomness)*opacity);
-    //   color=blend(color,layer);
-  // }
-  
-  // for(float i = 0.; i < N; i++) {
-    //   float radius    = map(ease(i / N), 0., 1., .3,.4);
-    //   float dist = map(ease(i / N), 0., 1., .1, .03);
-    //   float randomness = 2.7;
-    //   float opacity = map(ease(i / N), 0., 1., 1., 0.1);
-    
-    //   vec4 layer = vec4(white, shape(p,radius,dist, randomness) * opacity);
-    //   color = blend(color, layer);
-  // }
-  
+  color=blend(color,logo(p));
   color=blend(vec4(black,1.),color);
+  
   gl_FragColor=color;
 }
