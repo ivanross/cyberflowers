@@ -1,13 +1,19 @@
 import buildRegl from 'regl'
 import mouseChange from 'mouse-change'
-import fragmentShaderCode from 'shaders/fbm.frag'
+import fragmentShaderCode from 'shaders/cover2.frag'
+import logo from 'shaders/logo-white@1220x810.png'
 
 const regl = buildRegl()
-
+const glsl = x => x.join('\n')
+var image = new Image()
+image.src = logo
+console.log(image)
+// var imageTexture = regl.texture(image)
+// console.log(imageTexture)
 const draw = regl({
   frag: fragmentShaderCode,
 
-  vert: `
+  vert: glsl`
     precision mediump float;
     attribute vec2 position;
     void main () {
@@ -24,9 +30,11 @@ const draw = regl({
   },
 
   uniforms: {
-    resolution: ({ viewportWidth, viewportHeight }) => [viewportWidth, viewportHeight],
-    mouse: regl.prop('mouse'),
-    time: regl.context('time'),
+    u_resolution: ({ viewportWidth, viewportHeight }) => [viewportWidth, viewportHeight],
+    u_mouse: regl.prop('mouse'),
+    u_time: regl.context('time'),
+    u_randomness: 1,
+    u_speed: 1,
   },
 
   count: 3,
