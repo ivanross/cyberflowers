@@ -2,6 +2,9 @@
   "glsl-canvas.refreshOnChange": false,
   "glsl-canvas.uniforms": {
     "u_randomness": 1.0,
-    "u_speed": 1.0
+    "u_speed": 1.0,
+    "u_distance": 1.0,
+    "u_radius": 1.0,
+    "u_radius_offset": 1.0
   }
 }

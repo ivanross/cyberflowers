@@ -5,6 +5,9 @@ precision mediump float;
 
 uniform float u_time;
 uniform float u_randomness;
+uniform float u_distance;
+uniform float u_radius;
+uniform float u_radius_offset;
 uniform vec2 u_mouse;
 uniform float u_speed;
 uniform vec2 u_resolution;
@@ -91,7 +94,7 @@ float circle(vec2 p,vec2 c,float r){
 
 mat2 rotate(float a){return mat2(cos(a),-sin(a),sin(a),cos(a));}
 
-float shape(vec2 p,float rad,float amp,float randomness){
+float _shape(vec2 p,float rad,float amp,float randomness){
   vec2 c=vec2(0.);
   float a=atan(p.x,p.y);
   float max_r=rad+amp/2.;
@@ -99,7 +102,12 @@ float shape(vec2 p,float rad,float amp,float randomness){
   
   float r=map(noise(vec2(1.,0.)*rotate(a)*randomness+u_time*u_speed),-1.,1.,min_r,max_r);
   
-  return circle(p,c,r)-circle(p,c,r-.003);
+  return circle(p,c,r);
+}
+
+float shape(vec2 p,float rad,float amp,float randomness){
+  return _shape(p,rad,amp,randomness)-
+  _shape(p,rad-.003,amp,randomness);
 }
 
 void main(){
@@ -109,25 +117,29 @@ void main(){
   #define N 12.
   vec4 color=vec4(black,0.);
   
-  // for(float i = 0.; i < N; i++) {
-    //   float radius = map(i, 0., N, .4,.45);
-    //   float dist = .1;//map(ease(i / N), 0., 1., .1, .1);
-    //   float randomness = map(i, 0., N, 1.2, 4.);
-    //   float opacity = map(ease(i / N), 0., 1., 1., 0.2);
+  for(float i=N;i>=0.;i--){
+    float offset=.5*u_radius_offset;
     
-    //   vec4 layer = vec4(white * opacity, shape(p, radius, dist, randomness) );
-    //   color = blend( layer,color);
-  // }
-  
-  for(float i=1.;i<N;i++){
-    float radius=map(ease(i/N),0.,1.,.35,.45);
-    float dist=map(ease(i/N),0.,1.,.02,.17);
-    float randomness=5.*u_randomness;
-    float opacity=map(ease(i/N),0.,1.,1.,.1);
+    float radius=map(i,0.,N,0.,offset)+u_radius*.4;
+    float dist=.4*u_distance;//map(ease(i / N), 0., 1., .1, .1);
+    float randomness=map(i,0.,N,1.2,4.)*u_randomness;
+    float opacity=map(ease(i/N),0.,1.,1.,.2);
     
-    vec4 layer=vec4(orange,shape(p,radius,dist,randomness)*opacity);
-    color=blend(color,layer);
+    vec4 body=vec4(black,_shape(p,radius,dist,randomness));
+    vec4 outfit=vec4(white*opacity,shape(p,radius,dist,randomness));
+    color=blend(color,body);
+    color=blend(color,outfit);
   }
+  
+  // for(float i=1.;i<N;i++){
+    //   float radius=map(ease(i/N),0.,1.,.35,.45);
+    //   float dist=map(ease(i/N),0.,1.,.02,.17);
+    //   float randomness=5.*u_randomness;
+    //   float opacity=map(ease(i/N),0.,1.,1.,.1);
+    
+    //   vec4 layer=vec4(orange,shape(p,radius,dist,randomness)*opacity);
+    //   color=blend(color,layer);
+  // }
   
   // for(float i = 0.; i < N; i++) {
     //   float radius    = map(ease(i / N), 0., 1., .3,.4);
